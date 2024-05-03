@@ -1,18 +1,16 @@
 # --- Imports --- #
 
 from dataclasses import dataclass, field
-from typing import Iterable, Self
-from pathlib import PureWindowsPath
+from typing import Iterable, Self, Tuple
 
 
 # --- Node Class --- #
 
 @dataclass(slots=True)
 class Node:
-    """Node to create a tree"""
+    """Node to create a tree, can be subclassed to fit your needs"""
     name: str
     children: list[Self] = field(default_factory=list)
-    data: str = ""
 
     def __str__(self) -> str:
         return self.name
@@ -22,6 +20,9 @@ class Node:
 
     def __len__(self) -> int:
         return len(self.children)
+
+    def __iter__(self):
+        return iter(self.children)
 
     @property
     def eob(self) -> bool:
@@ -54,36 +55,56 @@ class Node:
         """Get the child that contains name"""
         return next(self.get_children_by_name(name), None)
 
+# --- Tree Class --- #
 
-# --- Path Class --- #
-
-class Path(PureWindowsPath):
-    def __init__(self, *pathsegments) -> Self:
-        super().__init__(*pathsegments)
+@dataclass(slots=True)
+class Tree:
+    """A generic tree, can be subclassed to fit your needs"""
+    name: str
+    __path: Iterable[Node] = field(default_factory=list)
 
     def __str__(self) -> str:
-        return "/".join(self.parts).replace("\\", "/")
+        return self.name
 
+    def __iter__(self) -> Iterable[Node]:
+        return self.__path
 
-# --- Main --- #
+    def __len__(self) -> int:
+        return len(self.__path)
 
-if __name__ == "__main__":
-    def main():
-        node = Node("Users")
-        node2 = Node("SpartanOS")
-        node3 = Node("Apps")
-        tree = Node("C:", [node, node2, node3])
+    @property
+    def root(self) -> Node:
+        """Get the root of the tree (first node in a tree)"""
+        return self.path[0]
 
-        path = [tree]
-        path.append(path[-1].get_child_by_name("SpartanOS"))
-        path.pop()
-        path.append(path[-1].get_child_by_name("Apps"))
+    @property
+    def dir(self) -> Tuple[str]:
+        return tuple(map(lambda item: str(item), self.__path[-1].children))
 
-        path[-1].add_child(Node("Aurora"))
-        path.append(path[-1].get_child_by_name("Aurora"))
+    @property
+    def current(self) -> Node:
+        return self.__path[-1]
 
-        mypath = Path(*[str(item) for item in path])
+    @property
+    def path(self) -> list[Node]:
+        return [str(item) for item in self.__path]
 
-        print(tree, mypath, sep="\n")
+    def open(self, name: str) -> Node:
+        node = self.__path[-1].get_child_by_name(name)
+        if node is None:
+            raise ValueError(f"Invalid node, {name} not found.")
+        self.__path.append(node)
+        
+    def add(self, name: str) -> None:
+        self.__path[-1].add_child(Node(name))
 
-    main()
+    def remove(self, name: str) -> None:
+        if name not in self.__path[-1]:
+            raise ValueError(f"Invalid node, {name} not found.")
+        self.__path[-1].remove_child(name)
+    
+    def clear(self):
+        del self.__path[1:]
+
+    def back(self) -> Node:
+        del self.__path[-1]
