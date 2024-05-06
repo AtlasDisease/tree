@@ -45,6 +45,11 @@ class FocusTree(Tree):
         node.active = True
 
 
+
+SkillTree = FocusTree #Alias
+SkillTreeNode = FocusTreeNode #Alias
+
+
 # --- Main --- #
 
 if __name__ == "__main__":
