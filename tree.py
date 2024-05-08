@@ -55,56 +55,54 @@ class Node:
         """Get the child that contains name"""
         return next(self.get_children_by_name(name), None)
 
+
 # --- Tree Class --- #
 
 @dataclass(slots=True)
 class Tree:
     """A generic tree, can be subclassed to fit your needs"""
     name: str
-    __path: Iterable[Node] = field(default_factory=list)
+    __root: Node
 
     def __str__(self) -> str:
         return self.name
 
     def __iter__(self) -> Iterable[Node]:
-        return iter(self.__path)
+        return iter(self.__root)
 
     def __len__(self) -> int:
-        return len(self.__path)
+        return len(self.__root)
 
     @property
     def root(self) -> Node:
-        """Get the root of the tree (first node in a tree)"""
-        return self.path[0]
+        return self.__root
 
-    @property
-    def dir(self) -> Tuple[str]:
-        return tuple(map(lambda item: str(item), self.__path[-1].children))
+    def __get_node(self, name: str, root: Node) -> Node | None:
+        for node in root:
+            if len(node) > 0:
+                return_node = self.__get_node(name, node)
 
-    @property
-    def current(self) -> Node:
-        return self.__path[-1]
+            if name == str(node):
+                return node
 
-    @property
-    def path(self) -> list[Node]:
-        return [str(item) for item in self.__path]
+        return return_node
 
-    def open(self, name: str) -> Node:
-        node = self.__path[-1].get_child_by_name(name)
-        if node is None:
-            raise ValueError(f"Invalid node, {name} not found.")
-        self.__path.append(node)
-        
-    def add(self, name: str) -> None:
-        self.__path[-1].add_child(Node(name))
+    def get_node(self, name: str) -> Node:
+        return self.__get_node(name, self.root)
 
-    def remove(self, name: str) -> None:
-        if name not in self.__path[-1]:
-            raise ValueError(f"Invalid node, {name} not found.")
-        self.__path[-1].remove_child(name)
-    
-    def clear(self):
-        del self.__path[1:]
 
-    def back(self) -> Node:
-        del self.__path[-1]
+# --- MultiRootTree Class --- #
+
+@dataclass(slots=True)
+class MultiRootTree:
+    name: str
+    __trees: list[Tree]
+
+    def __str__(self) -> str:
+        return self.name
+
+    def __iter__(self) -> Iterable[Tree]:
+        return iter(self.__trees)
+
+    def __len__(self) -> int:
+        return len(self.__trees)

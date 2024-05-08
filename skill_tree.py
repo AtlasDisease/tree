@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass, field
 from typing import Self
-from tree import Tree, Node
+from tree import MultiRootTree, Tree, Node
 
 
 # --- FocusTreeNode Class --- #
@@ -25,9 +25,7 @@ class FocusTreeNode(Node):
 # --- FocusTree Class --- #
 
 @dataclass(slots=True)
-class FocusTree(Tree):
-    """Trees can have multiple roots"""
-    
+class FocusTree(MultiRootTree):
     def __available_nodes(self,
                           returnList: list[FocusTreeNode],
                           root: FocusTreeNode) -> None:
@@ -49,7 +47,6 @@ class FocusTree(Tree):
 
     def all_available_nodes(self) -> list[list[FocusTreeNode]]:
         return [self.available_nodes(root) for root in iter(self)]
-
 
 
 SkillTree = FocusTree #Alias
@@ -76,16 +73,20 @@ if __name__ == "__main__":
         root = FocusTreeNode("Agility", [node, node3], True)
         root2 = FocusTreeNode("Damage", [node7, node10], True)
 
-        focustree = FocusTree("Skill Tree", [root, root2])
+        #focustree = Tree("Skill Tree", [root, root2])
+        focustree = Tree("Agility Tree", root)
+        focustree2 = Tree("Damage Tree", root2)
+
+        masterfocustree = FocusTree("Skill Tree", [focustree, focustree2])
         
-        print(focustree,
-              [str(node) for node in focustree.available_nodes(root)],
+        print(masterfocustree,
+              [str(node) for node in masterfocustree.available_nodes(root)],
               sep="\n")
-        focustree.buy_node(node)
+        masterfocustree.buy_node(node)
         print("\n",
-              focustree,
-              [str(node) for node in focustree.available_nodes(root)],
+              masterfocustree,
+              [str(node) for node in masterfocustree.available_nodes(root)],
               sep="\n")
         print()
-        print([[str(n) for n in node] for node in focustree.all_available_nodes()])
+        print([[str(n) for n in node] for node in masterfocustree.all_available_nodes()])
     main()

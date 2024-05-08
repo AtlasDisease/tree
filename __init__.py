@@ -3,11 +3,11 @@
 try:
     from .fs_tree import FSTree, FSNode
     from .skill_tree import FocusTree, FocusTreeNode, SkillTree, SkillTreeNode
-    #from .tree import Tree, Node
+    from .tree import Tree, Node
 except ImportError:
     from fs_tree import FSTree, FSNode
     from skill_tree import FocusTree, FocusTreeNode, SkillTree, SkillTreeNode
-    #from tree import Tree, Node
+    from tree import Tree, Node
 
 
 # --- Main --- #
@@ -18,7 +18,7 @@ if __name__ == "__main__":
         node2 = FSNode("SpartanOS")
         node3 = FSNode("Apps")
         root = FSNode("C:", [node, node2, node3])
-        tree = FSTree("ATFS", [root])
+        tree = FSTree("ATFS", root)
 
         tree.open("SpartanOS")
         tree.open("..")
@@ -37,20 +37,34 @@ if __name__ == "__main__":
         node5 = FocusTreeNode("Movement III")
         node4 = FocusTreeNode("Movement II", [node5])
         node = FocusTreeNode("Movement I", [node4])
-        #node.active = True
-        node2 = FocusTreeNode("Triple Jump")
-        node3 = FocusTreeNode("Double Jump", [node2])        
-        root = FocusTreeNode("Agility", [node, node3, node6], True)
-        #root.active = True
         
-        focustree = FocusTree("Skill Tree", [root])
-        print(focustree,
-              [str(node) for node in focustree.available_nodes(root)],
+        node2 = FocusTreeNode("Triple Jump")
+        node3 = FocusTreeNode("Double Jump", [node2])
+
+        node9 = FocusTreeNode("Damage III")
+        node8 = FocusTreeNode("Damage II", [node9])
+        node7 = FocusTreeNode("Damage I", [node8], True)
+        node10 = FocusTreeNode("Blast I")
+
+        root = FocusTreeNode("Agility", [node, node3], True)
+        root2 = FocusTreeNode("Damage", [node7, node10], True)
+        
+        focustree = Tree("Agility Tree", root)
+        focustree2 = Tree("Damage Tree", root2)
+
+        masterfocustree = FocusTree("Skill Tree", [focustree, focustree2])
+        
+        print(masterfocustree,
+              [str(node) for node in masterfocustree.available_nodes(root)],
               sep="\n")
-        focustree.buy_node(node)
+        masterfocustree.buy_node(node)
+        print("\n",
+              masterfocustree,
+              [str(node) for node in masterfocustree.available_nodes(root)],
+              sep="\n")
         print()
-        print(focustree,
-              [str(node) for node in focustree.available_nodes(root)],
-              sep="\n")
+        print([[str(n) for n in node] for node in masterfocustree.all_available_nodes()])
+
+
 
     main()
