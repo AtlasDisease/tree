@@ -9,6 +9,9 @@ except ImportError:
     from skill_tree import FocusTree, FocusTreeNode, SkillTree, SkillTreeNode
     #from tree import Tree, Node
 
+
+# --- Main --- #
+
 if __name__ == "__main__":
     def main():
         node = FSNode("Users")
@@ -29,14 +32,16 @@ if __name__ == "__main__":
         print(tree, tree.path, tree.dir, sep="\n")
 
         print("\n")
-        
-        node = FocusTreeNode("Movement II")
+
+        node6 = FocusTreeNode("Speed I")
+        node5 = FocusTreeNode("Movement III")
+        node4 = FocusTreeNode("Movement II", [node5])
+        node = FocusTreeNode("Movement I", [node4])
+        #node.active = True
         node2 = FocusTreeNode("Triple Jump")
-        node3 = FocusTreeNode("Double Jump", [node2])
-        node3.active = True
-        
-        root = FocusTreeNode("Agility", [node, node3])
-        root.active = True
+        node3 = FocusTreeNode("Double Jump", [node2])        
+        root = FocusTreeNode("Agility", [node, node3, node6], True)
+        #root.active = True
         
         focustree = FocusTree("Skill Tree", [root])
         print(focustree,

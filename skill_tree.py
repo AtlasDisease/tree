@@ -16,7 +16,7 @@ class FocusTreeNode(Node):
         return self.__active
 
     @active.setter
-    def active(self, value):
+    def active(self, value: bool):
         if not isinstance(value, bool):
             raise ValueError(f"Expected boolean, got {value}")
         self.__active = value
@@ -26,12 +26,15 @@ class FocusTreeNode(Node):
 
 @dataclass(slots=True)
 class FocusTree(Tree):
-    def __available_nodes(self, returnList: list[FocusTreeNode],
+    """Trees can have multiple roots"""
+    
+    def __available_nodes(self,
+                          returnList: list[FocusTreeNode],
                           root: FocusTreeNode) -> None:
         for node in root:
             if node.active:
-                returnList.extend(list(filter(
-                    lambda subnode: not subnode.active, node)))
+                returnList.extend(
+                    [subnode for subnode in node if not subnode.active])
                 continue
 
             returnList.append(node)
@@ -41,8 +44,11 @@ class FocusTree(Tree):
     def available_nodes(self, root: Node) -> list[FocusTreeNode]:
         return self.__available_nodes([], root)
 
-    def buy_node(self, node: FocusTreeNode):
+    def buy_node(self, node: FocusTreeNode) -> None:
         node.active = True
+
+    def all_available_nodes(self) -> list[list[FocusTreeNode]]:
+        return [self.available_nodes(root) for root in iter(self)]
 
 
 
@@ -54,13 +60,24 @@ SkillTreeNode = FocusTreeNode #Alias
 
 if __name__ == "__main__":
     def main():
-        node = FocusTreeNode("Movement II")
+        node6 = FocusTreeNode("Speed I")
+        node5 = FocusTreeNode("Movement III")
+        node4 = FocusTreeNode("Movement II", [node5])
+        node = FocusTreeNode("Movement I", [node4])
+        
         node2 = FocusTreeNode("Triple Jump")
         node3 = FocusTreeNode("Double Jump", [node2])
-        node3.active = True
-        root = FocusTreeNode("Agility", [node, node3])
-        root.active = True
-        focustree = FocusTree("Skill Tree", [root])
+
+        node9 = FocusTreeNode("Damage III")
+        node8 = FocusTreeNode("Damage II", [node9])
+        node7 = FocusTreeNode("Damage I", [node8], True)
+        node10 = FocusTreeNode("Blast I")
+
+        root = FocusTreeNode("Agility", [node, node3], True)
+        root2 = FocusTreeNode("Damage", [node7, node10], True)
+
+        focustree = FocusTree("Skill Tree", [root, root2])
+        
         print(focustree,
               [str(node) for node in focustree.available_nodes(root)],
               sep="\n")
@@ -69,5 +86,6 @@ if __name__ == "__main__":
               focustree,
               [str(node) for node in focustree.available_nodes(root)],
               sep="\n")
-  
+        print()
+        print([[str(n) for n in node] for node in focustree.all_available_nodes()])
     main()

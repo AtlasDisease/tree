@@ -67,7 +67,7 @@ class Tree:
         return self.name
 
     def __iter__(self) -> Iterable[Node]:
-        return self.__path
+        return iter(self.__path)
 
     def __len__(self) -> int:
         return len(self.__path)
